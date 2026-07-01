@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Unsaid - Promo Card</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, sans-serif;
+    flex-direction: column;
+    gap: 24px;
+    padding: 20px;
+  }
+  canvas {
+    max-width: 100%;
+    height: auto;
+    border-radius: 16px;
+    box-shadow: 0 20px 80px rgba(201,168,76,0.08);
+  }
+  .actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  button {
+    background: #c9a84c;
+    border: none;
+    color: #0a0a0a;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 10px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  button:hover { opacity: 0.85; }
+  button.outline {
+    background: none;
+    border: 1px solid #c9a84c;
+    color: #c9a84c;
+  }
+  .tagline {
+    color: rgba(255,255,255,0.3);
+    font-size: 0.8rem;
+    text-align: center;
+    max-width: 400px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+<canvas id="card" width="600" height="700"></canvas>
+<div class="actions">
+  <button onclick="downloadCard()">Download</button>
+  <button class="outline" onclick="shareCard()">Share</button>
+</div>
+<div class="tagline">
+  Screenshot or download — share anywhere.
+</div>
+<script>
+const canvas = document.getElementById('card');
+const ctx = canvas.getContext('2d');
+const W = 600, H = 700;
+
+function drawCard(text, subtext) {
+  // Background
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, '#0a0a0a');
+  grad.addColorStop(0.4, '#0d0d14');
+  grad.addColorStop(1, '#080812');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid dots
+  ctx.fillStyle = 'rgba(201,168,76,0.04)';
+  for (let x = 20; x < W; x += 24) {
+    for (let y = 20; y < H; y += 24) {
+      ctx.beginPath(); ctx.arc(x, y, 1, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  // Glass card
+  const cardX = 28, cardY = 80, cardW = W - 56, cardH = H - 150;
+  ctx.save();
+  ctx.shadowColor = 'rgba(201,168,76,0.06)';
+  ctx.shadowBlur = 40; ctx.shadowOffsetY = 8;
+  ctx.beginPath(); ctx.roundRect(cardX, cardY, cardW, cardH, 24);
+  ctx.fillStyle = 'rgba(255,255,255,0.03)';
+  ctx.fill(); ctx.restore();
+  ctx.beginPath(); ctx.roundRect(cardX, cardY, cardW, cardH, 24);
+  ctx.strokeStyle = 'rgba(201,168,76,0.08)';
+  ctx.lineWidth = 1; ctx.stroke();
+
+  // Emblems
+  ctx.save();
+  ctx.translate(48, 100);
+  ctx.strokeStyle = 'rgba(201,168,76,0.25)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(0, 18); ctx.lineTo(0, 0); ctx.lineTo(18, 0); ctx.stroke();
+  ctx.restore();
+  ctx.save();
+  ctx.translate(W - 48, H - 100);
+  ctx.strokeStyle = 'rgba(201,168,76,0.25)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(0, -18); ctx.lineTo(0, 0); ctx.lineTo(-18, 0); ctx.stroke();
+  ctx.restore();
+
+  // Glow lines
+  ctx.save();
+  ctx.shadowColor = 'rgba(201,168,76,0.15)'; ctx.shadowBlur = 12;
+  ctx.fillStyle = '#c9a84c';
+  ctx.fillRect(80, 96, W - 160, 1.5);
+  ctx.fillRect(80, H - 104, W - 160, 1.5);
+  ctx.restore();
+
+  // Brand
+  ctx.font = '12px Inter, sans-serif';
+  ctx.fillStyle = 'rgba(201,168,76,0.6)';
+  ctx.textAlign = 'left';
+  ctx.fillText('UNSAID', 48, 132);
+
+  // Main text
+  const words = text.split(' ');
+  const maxW = cardW - 80;
+  let lines = [], line = '';
+  ctx.font = '23px "Playfair Display", Georgia, serif';
+  for (const word of words) {
+    const test = line + (line ? ' ' : '') + word;
+    if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = word; }
+    else { line = test; }
+  }
+  if (line) lines.push(line);
+  const lineH = 36;
+  const totalH = lines.length * lineH;
+  const textY = Math.max(220, (H - totalH) / 2 - 10);
+
+  const textGrad = ctx.createLinearGradient(0, 180, 0, H - 100);
+  textGrad.addColorStop(0, '#e8e6e3');
+  textGrad.addColorStop(1, '#a8a6a3');
+  ctx.font = '23px "Playfair Display", Georgia, serif';
+  ctx.fillStyle = textGrad;
+  ctx.textAlign = 'left';
+  lines.forEach((l, i) => ctx.fillText(l, 66, textY + i * lineH));
+
+  // Subtext
+  if (subtext) {
+    ctx.font = '15px "Playfair Display", Georgia, serif';
+    ctx.fillStyle = 'rgba(201,168,76,0.5)';
+    ctx.textAlign = 'center';
+    ctx.fillText(subtext, W / 2, Math.min(textY + totalH + 40, H - 140));
+  }
+
+  // Attribution
+  ctx.font = '11px Inter, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.textAlign = 'center';
+  ctx.fillText(window.location.hostname || 'unsaid.app', W / 2, H - 85);
+
+  // Watermark
+  ctx.save();
+  ctx.globalAlpha = 0.03;
+  ctx.font = '160px "Playfair Display", Georgia, serif';
+  ctx.fillStyle = '#c9a84c';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('U', W / 2, H / 2 + 20);
+  ctx.restore();
+}
+
+function downloadCard() {
+  const link = document.createElement('a');
+  link.download = 'unsaid-card.png';
+  canvas.toBlob(b => { link.href = URL.createObjectURL(b); link.click(); });
+}
+
+async function shareCard() {
+  const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+  if (navigator.canShare && navigator.canShare({ files: [new File([blob], 'unsaid-card.png', { type: 'image/png' })] })) {
+    navigator.share({ files: [new File([blob], 'unsaid-card.png', { type: 'image/png' })], title: 'Unsaid' });
+  } else {
+    downloadCard();
+  }
+}
+
+// --- Choose your promo message ---
+const messages = [
+  { text: 'Some words are too heavy to carry.\nBut they deserve to exist.', subtext: 'unsaid-pjz.pages.dev' },
+  { text: 'What would you say\nif no one was listening?', subtext: 'unsaid-pjz.pages.dev' },
+  { text: 'The things we never say\nlive louder in silence.', subtext: 'unsaid-pjz.pages.dev' },
+  { text: 'Release it.\nBurn it.\nOr let someone read it.', subtext: 'unsaid-pjz.pages.dev' },
+];
+
+let idx = 0;
+drawCard(messages[idx].text, messages[idx].subtext);
+
+document.addEventListener('click', () => {
+  idx = (idx + 1) % messages.length;
+  drawCard(messages[idx].text, messages[idx].subtext);
+});
+</script>
+</body>
+</html>
