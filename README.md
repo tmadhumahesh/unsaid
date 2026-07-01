@@ -2,16 +2,24 @@
 
 What you wish you could say but can't.
 
-A web app where you type something you could never say out loud — then either **release it into the void** or **burn it forever**.
+Type something you could never say out loud — then either **release it into the void** or **burn it forever**.
 
-## Viral features
+## Features
 
-- **Share as Card** — generates a beautiful canvas image of your message to post on social media
-- **Copy Share Link** — one click copies a URL with your message; send it to someone
-- **Response chain** — when someone opens your link, they see your message and can respond with their own
-- **Your Void** — every released message stays in your personal collection, browse it anytime
-- **Light / Dark theme** — toggle or automatic based on system preference
-- **Zero friction** — no signup, no accounts, just type and go
+- **Share as Card** — generates a beautiful canvas image or animated GIF of your message with gold emblems, glow lines, and gradient text
+- **Share on social media** — one-click share to X/Twitter, Facebook, and LinkedIn with the card image attached (mobile) or URL (desktop)
+- **Copy Share Link** — copies a URL with your message encoded; the recipient sees it as a response prompt
+- **Your Void** — every released message stored in your personal collection with filters (Today / This Week / This Month / All), text search, individual delete, and reset
+- **Light / Dark theme** — toggle with system preference detection, persisted in localStorage
+- **Zero friction** — no signup, no accounts, fully client-side
+
+## Deploy
+
+Fully static — deploy the `public/` folder to any static host (Cloudflare Pages, Netlify, Vercel, GitHub Pages).
+
+```bash
+npm run deploy   # pushes main branch → Cloudflare Pages auto-deploy
+```
 
 ## Run locally
 
@@ -23,7 +31,10 @@ Open http://localhost:3000.
 
 ## Stack
 
-- Plain HTML, CSS, JavaScript
-- Express (local dev only)
+- Plain HTML, CSS, JavaScript (no framework, no build step)
 - Canvas API for share card generation
-- localStorage for your released messages
+- [gif.js](https://github.com/jnordberg/gif.js) for animated GIF output (local worker at `/gif.worker.js`)
+- Web Share API for sharing card images on mobile
+- localStorage for released messages
+- Express (local dev server only)
+- Cloudflare Pages for hosting
