@@ -40,6 +40,9 @@ const el = {
   btnGif: $('#btn-gif'),
   gifLoading: $('#gif-loading'),
   btnCopyCardLink: $('#btn-copy-card-link'),
+  btnShareTwitter: $('#btn-share-twitter'),
+  btnShareFacebook: $('#btn-share-facebook'),
+  btnShareLinkedin: $('#btn-share-linkedin'),
 };
 
 let currentText = '';
@@ -614,14 +617,33 @@ el.btnCopyCardLink.addEventListener('click', () => {
   copyShareLink(text);
 });
 
+function getShareUrl(text) {
+  return window.location.origin + window.location.pathname + '?m=' + encodeURIComponent(text);
+}
+
 function copyShareLink(text) {
-  const url = window.location.origin + window.location.pathname + '?m=' + encodeURIComponent(text);
-  navigator.clipboard.writeText(url).then(() => {
+  navigator.clipboard.writeText(getShareUrl(text)).then(() => {
     showToast('Link copied! Share it with someone.');
   }).catch(() => {
     showToast('Could not copy. Select and copy the URL manually.');
   });
 }
+
+function shareSocial(platform) {
+  const text = el.cardGif.classList.contains('hidden') ? currentText : currentText;
+  const url = getShareUrl(text);
+  const encoded = encodeURIComponent;
+  const shareUrls = {
+    twitter: `https://twitter.com/intent/tweet?text=${encoded('"')}${encoded(text)}${encoded('"')}&url=${encoded(url)}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encoded(url)}&quote=${encoded(text)}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encoded(url)}`,
+  };
+  window.open(shareUrls[platform], '_blank', 'width=600,height=500');
+}
+
+el.btnShareTwitter.addEventListener('click', () => shareSocial('twitter'));
+el.btnShareFacebook.addEventListener('click', () => shareSocial('facebook'));
+el.btnShareLinkedin.addEventListener('click', () => shareSocial('linkedin'));
 
 // --- Local Void ---
 function loadVoid() {

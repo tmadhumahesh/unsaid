@@ -533,6 +533,36 @@ section {
   width: 100%;
 }
 
+.social-actions {
+  justify-content: center;
+  gap: 8px;
+}
+
+.social-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: var(--text-muted);
+}
+
+.social-btn:hover {
+  background: var(--bg-elevated);
+  border-color: var(--text-dim);
+  color: var(--text);
+}
+
+.social-btn.twitter:hover { color: #1d9bf0; border-color: #1d9bf0; }
+.social-btn.facebook:hover { color: #1877f2; border-color: #1877f2; }
+.social-btn.linkedin:hover { color: #0a66c2; border-color: #0a66c2; }
+.social-btn.copy:hover { color: var(--accent); border-color: var(--accent); }
+
 .gif-loading {
   text-align: center;
   color: var(--text-muted);
