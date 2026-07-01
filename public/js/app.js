@@ -429,10 +429,10 @@ async function generateGif(text) {
 
   const gif = new GIF({
     workers: 2,
-    quality: 12,
+    quality: 10,
     width: W,
     height: H,
-    workerURL: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js',
+    workerScript: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js',
   });
 
   for (let f = 0; f < totalFrames; f++) {
@@ -549,6 +549,12 @@ async function generateGif(text) {
 
   gif.on('progress', (pct) => {
     el.gifLoading.textContent = `Rendering... ${Math.round(pct * 100)}%`;
+  });
+
+  gif.on('error', (err) => {
+    el.gifLoading.textContent = 'GIF failed: ' + (err.message || 'unknown error');
+    el.btnGif.disabled = false;
+    setTimeout(() => el.gifLoading.classList.add('hidden'), 3000);
   });
 
   gif.on('finished', (blob) => {
