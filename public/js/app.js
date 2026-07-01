@@ -630,13 +630,14 @@ function copyShareLink(text) {
 }
 
 function shareSocial(platform) {
-  const text = el.cardGif.classList.contains('hidden') ? currentText : currentText;
+  const text = currentText;
   const url = getShareUrl(text);
   const encoded = encodeURIComponent;
+  const quote = `"${text}" — shared via Unsaid`;
   const shareUrls = {
-    twitter: `https://twitter.com/intent/tweet?text=${encoded('"')}${encoded(text)}${encoded('"')}&url=${encoded(url)}`,
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encoded(url)}&quote=${encoded(text)}`,
-    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encoded(url)}`,
+    twitter: `https://twitter.com/intent/tweet?text=${encoded(quote)}&url=${encoded(url)}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encoded(url)}&quote=${encoded(quote)}`,
+    linkedin: `https://www.linkedin.com/shareArticle?mini=true&url=${encoded(url)}&title=${encoded('An Unsaid message')}&summary=${encoded(quote)}&source=unsaid.app`,
   };
   window.open(shareUrls[platform], '_blank', 'width=600,height=500');
 }
