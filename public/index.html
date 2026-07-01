@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unsaid</title>
+  <meta property="og:title" content="Unsaid">
+  <meta property="og:description" content="What you wish you could say but can't.">
+  <meta property="og:image" content="/og.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1 class="logo">Unsaid.</h1>
+      <div class="header-end">
+        <nav>
+          <button id="btn-write" class="nav-btn active">Say</button>
+          <button id="btn-void" class="nav-btn">Void</button>
+        </nav>
+        <button id="btn-theme" class="theme-btn" aria-label="Toggle theme"></button>
+      </div>
+    </header>
+
+    <main>
+      <section id="view-write">
+        <div class="input-stage" id="stage-input">
+          <label for="unsaid-input" class="prompt" id="prompt-label">What do you wish you could say?</label>
+          <div id="shared-context" class="shared-context hidden"></div>
+          <textarea id="unsaid-input" rows="3" placeholder="Type it here..." maxlength="500"></textarea>
+          <div class="char-count"><span id="char-count">0</span>/500</div>
+        </div>
+
+        <div class="choice-stage hidden" id="stage-choice">
+          <div class="preview-text" id="preview-text"></div>
+          <p class="choice-prompt">What do you want to do with this?</p>
+          <div class="choice-buttons">
+            <button id="btn-release" class="choice-btn release">
+              <span class="choice-icon">&#9733;</span>
+              Release to the Void
+              <span class="choice-desc">It joins your collection of unsaid things</span>
+            </button>
+            <button id="btn-burn" class="choice-btn burn">
+              <span class="choice-icon">&#128293;</span>
+              Burn It
+              <span class="choice-desc">It disappears forever. Just you and this moment.</span>
+            </button>
+          </div>
+          <button id="btn-back" class="back-link">&larr; Write something else</button>
+        </div>
+
+        <div class="animation-stage hidden" id="stage-anim">
+          <div id="anim-container">
+            <div id="anim-text" class="anim-text"></div>
+          </div>
+          <div class="anim-done hidden" id="anim-done">
+            <p id="done-message" class="done-message"></p>
+            <div class="viral-actions" id="viral-actions">
+              <button id="btn-share-card" class="choice-btn">
+                <span class="choice-icon">&#128247;</span>
+                Share as Card
+                <span class="choice-desc">A beautiful image to post anywhere</span>
+              </button>
+              <button id="btn-copy-link" class="choice-btn secondary">
+                <span class="choice-icon">&#128279;</span>
+                Copy Share Link
+                <span class="choice-desc">Send this message to someone</span>
+              </button>
+            </div>
+            <div class="done-buttons" style="margin-top:12px">
+              <button id="btn-again" class="choice-btn">Say something else</button>
+              <button id="btn-go-void" class="choice-btn secondary">Browse the Void</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-void" class="hidden">
+        <h2 class="void-title">Your Void</h2>
+        <p class="void-subtitle">Everything you've released.</p>
+        <div id="void-feed" class="void-feed"></div>
+        <div id="void-empty" class="void-empty hidden">
+          <p>You haven't released anything yet.</p>
+          <p style="font-size:0.9rem;margin-top:8px;font-style:normal">The void waits.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>What will you leave unsaid?</p>
+    </footer>
+  </div>
+
+  <div id="share-modal" class="modal hidden">
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+    <div class="modal-content">
+      <button class="modal-close" id="modal-close">&times;</button>
+      <canvas id="card-canvas" class="card-canvas"></canvas>
+      <div class="card-actions">
+        <button id="btn-download-card" class="choice-btn">
+          <span class="choice-icon">&#11015;&#65039;</span>
+          Download
+        </button>
+        <button id="btn-copy-card-link" class="choice-btn secondary">
+          <span class="choice-icon">&#128279;</span>
+          Copy Link
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
