@@ -372,7 +372,7 @@ async function generateCard(text) {
   ctx.font = '11px Inter, sans-serif';
   ctx.fillStyle = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)';
   ctx.textAlign = 'center';
-  ctx.fillText('unsaid.app', W / 2, H - 78);
+    ctx.fillText(window.location.hostname, W / 2, H - 78);
 
   // --- Subtle watermark ---
   ctx.save();
@@ -526,7 +526,7 @@ async function generateGif(text) {
     ctx.font = '12px Inter, sans-serif';
     ctx.fillStyle = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)';
     ctx.textAlign = 'center';
-    ctx.fillText('unsaid.app', W / 2, H - 80);
+    ctx.fillText(window.location.hostname, W / 2, H - 80);
 
     // Animated particles
     particles.forEach((p) => {
@@ -662,7 +662,7 @@ async function shareSocial(platform) {
   const shareUrls = {
     twitter: `https://twitter.com/intent/tweet?text=${encoded(quote)}&url=${encoded(url)}`,
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encoded(url)}&quote=${encoded(quote)}`,
-    linkedin: `https://www.linkedin.com/shareArticle?mini=true&url=${encoded(url)}&title=${encoded('An Unsaid message')}&summary=${encoded(quote)}&source=unsaid.app`,
+    linkedin: `https://www.linkedin.com/shareArticle?mini=true&url=${encoded(url)}&title=${encoded('An Unsaid message')}&summary=${encoded(quote)}&source=${encoded(window.location.hostname)}`,
   };
   window.open(shareUrls[platform], '_blank', 'width=600,height=500');
 }
