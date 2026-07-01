@@ -261,7 +261,7 @@ async function generateCard(text) {
   }
 
   // --- Glass card background ---
-  const cardX = 28, cardY = 80, cardW = W - 56, cardH = H - 160;
+  const cardX = 28, cardY = 80, cardW = W - 56, cardH = H - 150;
   ctx.save();
   ctx.shadowColor = isDark ? 'rgba(201,168,76,0.06)' : 'rgba(0,0,0,0.04)';
   ctx.shadowBlur = 40;
@@ -372,7 +372,7 @@ async function generateCard(text) {
   ctx.font = '11px Inter, sans-serif';
   ctx.fillStyle = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)';
   ctx.textAlign = 'center';
-    ctx.fillText(window.location.hostname, W / 2, H - 78);
+    ctx.fillText(window.location.hostname, W / 2, H - 85);
 
   // --- Subtle watermark ---
   ctx.save();
@@ -526,7 +526,7 @@ async function generateGif(text) {
     ctx.font = '12px Inter, sans-serif';
     ctx.fillStyle = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)';
     ctx.textAlign = 'center';
-    ctx.fillText(window.location.hostname, W / 2, H - 80);
+    ctx.fillText(window.location.hostname, W / 2, H - 85);
 
     // Animated particles
     particles.forEach((p) => {
@@ -670,6 +670,13 @@ async function shareSocial(platform) {
 el.btnShareTwitter.addEventListener('click', () => shareSocial('twitter'));
 el.btnShareFacebook.addEventListener('click', () => shareSocial('facebook'));
 el.btnShareLinkedin.addEventListener('click', () => shareSocial('linkedin'));
+
+// --- Logo click to home ---
+document.querySelector('.logo')?.addEventListener('click', () => {
+  const shareModal = el.shareModal;
+  if (!shareModal.classList.contains('hidden')) shareModal.classList.add('hidden');
+  showStage(el.stageInput);
+});
 
 // --- Local Void ---
 function loadVoid() {
