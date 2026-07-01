@@ -35,7 +35,10 @@ const el = {
   modalBackdrop: $('#modal-backdrop'),
   modalClose: $('#modal-close'),
   cardCanvas: $('#card-canvas'),
+  cardGif: $('#card-gif'),
   btnDownloadCard: $('#btn-download-card'),
+  btnGif: $('#btn-gif'),
+  gifLoading: $('#gif-loading'),
   btnCopyCardLink: $('#btn-copy-card-link'),
 };
 
@@ -189,8 +192,34 @@ el.btnShareCard.addEventListener('click', () => {
   el.shareModal.classList.remove('hidden');
 });
 
-el.modalBackdrop.addEventListener('click', () => el.shareModal.classList.add('hidden'));
-el.modalClose.addEventListener('click', () => el.shareModal.classList.add('hidden'));
+el.modalBackdrop.addEventListener('click', () => closeModal());
+el.modalClose.addEventListener('click', () => closeModal());
+
+function closeModal() {
+  el.shareModal.classList.add('hidden');
+  el.cardCanvas.classList.remove('hidden');
+  el.cardGif.classList.add('hidden');
+  el.cardGif.src = '';
+  el.gifLoading.classList.add('hidden');
+  el.btnGif.disabled = false;
+  el.btnGif.innerHTML = '<span class="choice-icon">&#128373;&#65039;</span>Animate';
+  el.btnDownloadCard.title = 'Download static card';
+  if (el.btnDownloadCard._gifUrl) {
+    URL.revokeObjectURL(el.btnDownloadCard._gifUrl);
+    delete el.btnDownloadCard._gifUrl;
+  }
+}
+
+el.btnGif.addEventListener('click', () => {
+  if (el.btnGif.textContent.includes('Static')) {
+    el.cardGif.classList.add('hidden');
+    el.cardCanvas.classList.remove('hidden');
+    el.btnGif.innerHTML = '<span class="choice-icon">&#128373;&#65039;</span>Animate';
+    el.btnDownloadCard.title = 'Download static card';
+    return;
+  }
+  generateGif(currentText);
+});
 
 async function generateCard(text) {
   const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
@@ -349,6 +378,194 @@ async function generateCard(text) {
   ctx.restore();
 }
 
+async function generateGif(text) {
+  if (typeof GIF === 'undefined') {
+    showToast('GIF library loading, try again in a moment.');
+    return;
+  }
+
+  el.btnGif.disabled = true;
+  el.gifLoading.classList.remove('hidden');
+  el.cardCanvas.classList.add('hidden');
+  el.cardGif.classList.add('hidden');
+
+  const W = 400, H = 467;
+  const offscreen = document.createElement('canvas');
+  offscreen.width = W;
+  offscreen.height = H;
+  const ctx = offscreen.getContext('2d');
+
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  const accent = '#c9a84c';
+
+  // Word-wrap text into lines (reused each frame)
+  ctx.font = '17px "Playfair Display", Georgia, serif';
+  const maxW = W - 60;
+  const words = text.split(' ');
+  let lines = [], line = '';
+  for (const word of words) {
+    const test = line + (line ? ' ' : '') + word;
+    if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = word; }
+    else { line = test; }
+  }
+  if (line) lines.push(line);
+  if (lines.length > 11) { lines = lines.slice(0, 11); lines[10] += '...'; }
+  const lineH = 28;
+  const totalH = lines.length * lineH;
+
+  // Particles
+  const particleCount = 18;
+  const particles = Array.from({ length: particleCount }, () => ({
+    x: Math.random() * W,
+    y: Math.random() * H,
+    r: 1 + Math.random() * 1.5,
+    speed: 0.3 + Math.random() * 0.6,
+    drift: (Math.random() - 0.5) * 0.3,
+    alpha: 0.1 + Math.random() * 0.3,
+  }));
+
+  const totalFrames = 28;
+  const delay = 80;
+
+  const gif = new GIF({
+    workers: 2,
+    quality: 12,
+    width: W,
+    height: H,
+    workerURL: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js',
+  });
+
+  for (let f = 0; f < totalFrames; f++) {
+    const progress = f / totalFrames;
+
+    // Background
+    const grad = ctx.createLinearGradient(0, 0, W, H);
+    if (isDark) {
+      grad.addColorStop(0, '#0a0a0a'); grad.addColorStop(0.5, '#0d0d14'); grad.addColorStop(1, '#080812');
+    } else {
+      grad.addColorStop(0, '#faf8f5'); grad.addColorStop(0.5, '#f5f0eb'); grad.addColorStop(1, '#efe8e0');
+    }
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Grid dots
+    ctx.fillStyle = isDark ? 'rgba(201,168,76,0.04)' : 'rgba(0,0,0,0.03)';
+    for (let x = 16; x < W; x += 20) {
+      for (let y = 16; y < H; y += 20) {
+        ctx.beginPath(); ctx.arc(x, y, 0.8, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
+    // Glass card
+    const cX = 20, cY = 60, cW = W - 40, cH = H - 110;
+    ctx.save();
+    ctx.shadowColor = isDark ? 'rgba(201,168,76,0.06)' : 'rgba(0,0,0,0.04)';
+    ctx.shadowBlur = 30; ctx.shadowOffsetY = 6;
+    ctx.beginPath(); ctx.roundRect(cX, cY, cW, cH, 18);
+    ctx.fillStyle = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)';
+    ctx.fill(); ctx.restore();
+    ctx.beginPath(); ctx.roundRect(cX, cY, cW, cH, 18);
+    ctx.strokeStyle = isDark ? 'rgba(201,168,76,0.08)' : 'rgba(0,0,0,0.06)';
+    ctx.lineWidth = 1; ctx.stroke();
+
+    // Emblems
+    ctx.strokeStyle = isDark ? 'rgba(201,168,76,0.25)' : 'rgba(201,168,76,0.4)';
+    ctx.lineWidth = 1.2;
+    [[36, 78], [W - 36, H - 78]].forEach(([x, y], i) => {
+      ctx.save();
+      ctx.translate(x, y);
+      if (i === 1) { ctx.beginPath(); ctx.moveTo(0, 12); ctx.lineTo(0, 0); ctx.lineTo(-12, 0); ctx.stroke(); }
+      else { ctx.beginPath(); ctx.moveTo(0, 12); ctx.lineTo(0, 0); ctx.lineTo(12, 0); ctx.stroke(); }
+      ctx.restore();
+    });
+
+    // Top glow line
+    ctx.save();
+    ctx.shadowColor = `rgba(201,168,76,${0.12 + 0.06 * Math.sin(progress * Math.PI * 2)})`;
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = accent;
+    ctx.fillRect(60, 76, W - 120, 1.2);
+    ctx.restore();
+
+    // Brand
+    ctx.font = '10px Inter, sans-serif';
+    ctx.fillStyle = isDark ? 'rgba(201,168,76,0.6)' : 'rgba(201,168,76,0.7)';
+    ctx.textAlign = 'left';
+    ctx.fillText('UNSAID', 38, 106);
+
+    // Text with fade-in
+    const textAlpha = Math.min(1, progress * 2.5);
+    const textOffset = Math.max(0, (1 - textAlpha) * 20);
+    const textGrad = ctx.createLinearGradient(0, 150, 0, H - 80);
+    if (isDark) { textGrad.addColorStop(0, '#e8e6e3'); textGrad.addColorStop(1, '#a8a6a3'); }
+    else { textGrad.addColorStop(0, '#1a1a1a'); textGrad.addColorStop(1, '#5a5a5a'); }
+    ctx.font = '17px "Playfair Display", Georgia, serif';
+    ctx.fillStyle = textGrad;
+    ctx.textAlign = 'left';
+    ctx.globalAlpha = textAlpha;
+    const tY = Math.max(150, (H - totalH) / 2 + 10) + textOffset;
+    lines.forEach((l, i) => ctx.fillText(l, 48, tY + i * lineH));
+    ctx.globalAlpha = 1;
+
+    // Bottom glow line
+    ctx.save();
+    ctx.shadowColor = `rgba(201,168,76,${0.12 + 0.06 * Math.sin(progress * Math.PI * 2 + 1)})`;
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = accent;
+    ctx.fillRect(60, H - 80, W - 120, 1.2);
+    ctx.restore();
+
+    // Attribution
+    ctx.font = '9px Inter, sans-serif';
+    ctx.fillStyle = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)';
+    ctx.textAlign = 'center';
+    ctx.fillText('unsaid.app', W / 2, H - 60);
+
+    // Animated particles
+    particles.forEach((p) => {
+      p.y -= p.speed;
+      p.x += p.drift + Math.sin(f * 0.1 + p.x) * 0.1;
+      if (p.y < -10) { p.y = H + 10; p.x = Math.random() * W; }
+      const pulse = 0.5 + 0.5 * Math.sin(f * 0.15 + p.x);
+      ctx.globalAlpha = p.alpha * pulse * (progress > 0.2 ? 1 : progress / 0.2);
+      ctx.fillStyle = accent;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+
+    // Subtle shimmer sweep
+    if (progress > 0.15) {
+      const shimmerX = ((progress - 0.15) / 0.85) * (W + 100) - 50;
+      const shimmerGrad = ctx.createLinearGradient(shimmerX - 40, 0, shimmerX + 40, 0);
+      shimmerGrad.addColorStop(0, 'rgba(201,168,76,0)');
+      shimmerGrad.addColorStop(0.5, `rgba(201,168,76,${0.04 * Math.sin(progress * Math.PI)})`);
+      shimmerGrad.addColorStop(1, 'rgba(201,168,76,0)');
+      ctx.fillStyle = shimmerGrad;
+      ctx.fillRect(0, 50, W, H - 100);
+    }
+
+    gif.addFrame(ctx, { copy: true, delay });
+  }
+
+  gif.on('progress', (pct) => {
+    el.gifLoading.textContent = `Rendering... ${Math.round(pct * 100)}%`;
+  });
+
+  gif.on('finished', (blob) => {
+    const url = URL.createObjectURL(blob);
+    el.cardGif.src = url;
+    el.cardGif.classList.remove('hidden');
+    el.cardCanvas.classList.add('hidden');
+    el.gifLoading.classList.add('hidden');
+    el.btnGif.disabled = false;
+    el.btnGif.innerHTML = '<span class="choice-icon">&#128196;</span>Static';
+    el.btnDownloadCard.title = 'Download animated GIF';
+    el.btnDownloadCard._gifUrl = url;
+  });
+
+  gif.render();
+}
+
 // roundRect polyfill for canvas
 if (!CanvasRenderingContext2D.prototype.roundRect) {
   CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
@@ -370,10 +587,15 @@ if (!CanvasRenderingContext2D.prototype.roundRect) {
 // --- Share: Download ---
 el.btnDownloadCard.addEventListener('click', () => {
   const link = document.createElement('a');
-  link.download = 'unsaid.png';
-  link.href = el.cardCanvas.toDataURL('image/png');
+  if (el.cardGif.classList.contains('hidden')) {
+    link.download = 'unsaid.png';
+    link.href = el.cardCanvas.toDataURL('image/png');
+  } else if (el.btnDownloadCard._gifUrl) {
+    link.download = 'unsaid.gif';
+    link.href = el.btnDownloadCard._gifUrl;
+  } else { return; }
   link.click();
-  showToast('Card downloaded');
+  showToast(el.cardGif.classList.contains('hidden') ? 'Card downloaded' : 'GIF downloaded');
 });
 
 // --- Share: Copy link ---

@@ -98,21 +98,28 @@
     <div class="modal-content">
       <button class="modal-close" id="modal-close">&times;</button>
       <canvas id="card-canvas" class="card-canvas"></canvas>
+      <img id="card-gif" class="card-canvas hidden" alt="Animated card">
       <div class="card-actions">
-        <button id="btn-download-card" class="choice-btn">
+        <button id="btn-download-card" class="choice-btn" title="Download static card">
           <span class="choice-icon">&#11015;&#65039;</span>
           Download
+        </button>
+        <button id="btn-gif" class="choice-btn secondary" title="Generate animated GIF">
+          <span class="choice-icon">&#128373;&#65039;</span>
+          Animate
         </button>
         <button id="btn-copy-card-link" class="choice-btn secondary">
           <span class="choice-icon">&#128279;</span>
           Copy Link
         </button>
       </div>
+      <div id="gif-loading" class="gif-loading hidden">Rendering animation...</div>
     </div>
   </div>
 
   <div id="toast" class="toast hidden"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js"></script>
   <script src="/js/app.js"></script>
 </body>
 </html>

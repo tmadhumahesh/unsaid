@@ -533,6 +533,14 @@ section {
   width: 100%;
 }
 
+.gif-loading {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding: 12px;
+  animation: pulse 1s ease infinite;
+}
+
 /* Footer */
 footer {
   text-align: center;
