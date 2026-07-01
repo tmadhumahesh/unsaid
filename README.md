@@ -13,18 +13,6 @@ A web app where you type something you could never say out loud — then either 
 - **Light / Dark theme** — toggle or automatic based on system preference
 - **Zero friction** — no signup, no accounts, just type and go
 
-## Deploy (free, forever)
-
-Push to GitHub and connect to Cloudflare Pages:
-
-1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com) → **Pages** → **Connect to Git**
-2. Pick this repo
-3. Build command: *(leave blank)*
-4. Build output directory: `public`
-5. Click **Deploy**
-
-Your site lives at `https://your-project.pages.dev`. Free tier: unlimited requests, no sleeping.
-
 ## Run locally
 
 ```bash
