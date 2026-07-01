@@ -629,9 +629,30 @@ function copyShareLink(text) {
   });
 }
 
-function shareSocial(platform) {
+async function shareSocial(platform) {
   const text = currentText;
   const url = getShareUrl(text);
+
+  // Get card image blob (GIF or static PNG)
+  let blob;
+  const showingGif = !el.cardGif.classList.contains('hidden') && el.cardGif.src;
+  if (showingGif) {
+    try { const r = await fetch(el.cardGif.src); blob = await r.blob(); } catch {}
+  } else if (el.cardCanvas.width > 0) {
+    blob = await new Promise(r => el.cardCanvas.toBlob(r, 'image/png'));
+  }
+
+  // Try Web Share with the image file (mobile — shares the actual card image)
+  if (blob && navigator.canShare) {
+    const ext = showingGif ? 'gif' : 'png';
+    const file = new File([blob], `unsaid-card.${ext}`, { type: blob.type });
+    if (navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file], title: 'Unsaid', text, url }).catch(() => {});
+      return;
+    }
+  }
+
+  // Fallback: URL popup (desktop)
   const encoded = encodeURIComponent;
   const quote = `"${text}" — shared via Unsaid`;
   const shareUrls = {
