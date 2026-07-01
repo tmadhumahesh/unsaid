@@ -435,7 +435,7 @@ async function generateGif(text) {
     quality: 10,
     width: W,
     height: H,
-    workerScript: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js',
+    workerScript: '/gif.worker.js',
   });
 
   for (let f = 0; f < totalFrames; f++) {
