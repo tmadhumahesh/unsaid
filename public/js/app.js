@@ -200,30 +200,103 @@ async function generateCard(text) {
   canvas.height = H;
   const ctx = canvas.getContext('2d');
 
-  const bgColor = isDark ? '#0a0a0a' : '#f5f3f0';
-  const textColor = isDark ? '#e8e6e3' : '#1a1a1a';
-  const accentColor = '#c9a84c';
-  const mutedColor = isDark ? '#6b6b6b' : '#8a8a8a';
-
-  ctx.fillStyle = bgColor;
+  // --- Background gradient ---
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  if (isDark) {
+    grad.addColorStop(0, '#0a0a0a');
+    grad.addColorStop(0.5, '#0d0d14');
+    grad.addColorStop(1, '#080812');
+  } else {
+    grad.addColorStop(0, '#faf8f5');
+    grad.addColorStop(0.5, '#f5f0eb');
+    grad.addColorStop(1, '#efe8e0');
+  }
+  ctx.fillStyle = grad;
   ctx.fillRect(0, 0, W, H);
 
-  // Top accent line
-  ctx.fillStyle = accentColor;
-  ctx.fillRect(40, 40, W - 80, 2);
+  // --- Subtle grid dots ---
+  ctx.fillStyle = isDark ? 'rgba(201,168,76,0.04)' : 'rgba(0,0,0,0.03)';
+  for (let x = 20; x < W; x += 24) {
+    for (let y = 20; y < H; y += 24) {
+      ctx.beginPath();
+      ctx.arc(x, y, 1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
 
-  // Brand
-  ctx.font = '14px Inter, sans-serif';
-  ctx.fillStyle = accentColor;
+  // --- Glass card background ---
+  const cardX = 28, cardY = 80, cardW = W - 56, cardH = H - 160;
+  ctx.save();
+  ctx.shadowColor = isDark ? 'rgba(201,168,76,0.06)' : 'rgba(0,0,0,0.04)';
+  ctx.shadowBlur = 40;
+  ctx.shadowOffsetY = 8;
+  ctx.beginPath();
+  ctx.roundRect(cardX, cardY, cardW, cardH, 24);
+  ctx.fillStyle = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)';
+  ctx.fill();
+  ctx.restore();
+
+  ctx.beginPath();
+  ctx.roundRect(cardX, cardY, cardW, cardH, 24);
+  ctx.strokeStyle = isDark ? 'rgba(201,168,76,0.08)' : 'rgba(0,0,0,0.06)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // --- Top-left decorative emblem ---
+  ctx.save();
+  ctx.translate(48, 100);
+  ctx.strokeStyle = isDark ? 'rgba(201,168,76,0.25)' : 'rgba(201,168,76,0.4)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(0, 18);
+  ctx.lineTo(0, 0);
+  ctx.lineTo(18, 0);
+  ctx.stroke();
+  ctx.restore();
+
+  // --- Bottom-right decorative emblem ---
+  ctx.save();
+  ctx.translate(W - 48, H - 100);
+  ctx.strokeStyle = isDark ? 'rgba(201,168,76,0.25)' : 'rgba(201,168,76,0.4)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(0, -18);
+  ctx.lineTo(0, 0);
+  ctx.lineTo(-18, 0);
+  ctx.stroke();
+  ctx.restore();
+
+  // --- Top accent glow line ---
+  ctx.save();
+  ctx.shadowColor = isDark ? 'rgba(201,168,76,0.15)' : 'rgba(201,168,76,0.2)';
+  ctx.shadowBlur = 12;
+  ctx.fillStyle = '#c9a84c';
+  ctx.fillRect(80, 96, W - 160, 1.5);
+  ctx.restore();
+
+  // --- Brand ---
+  ctx.font = '12px Inter, sans-serif';
+  ctx.fillStyle = isDark ? 'rgba(201,168,76,0.6)' : 'rgba(201,168,76,0.7)';
   ctx.textAlign = 'left';
-  ctx.fillText('Unsaid.', 40, 75);
+  ctx.fillText('UNSAID', 48, 132);
+  ctx.font = '7px Inter, sans-serif';
+  ctx.fillStyle = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)';
+  ctx.fillText('______', 48, 142);
 
-  // Message text - word wrap
-  ctx.font = '22px "Playfair Display", Georgia, serif';
-  ctx.fillStyle = textColor;
+  // --- Message text with gradient ---
+  const textGrad = ctx.createLinearGradient(0, 180, 0, H - 100);
+  if (isDark) {
+    textGrad.addColorStop(0, '#e8e6e3');
+    textGrad.addColorStop(1, '#a8a6a3');
+  } else {
+    textGrad.addColorStop(0, '#1a1a1a');
+    textGrad.addColorStop(1, '#5a5a5a');
+  }
+  ctx.font = '23px "Playfair Display", Georgia, serif';
+  ctx.fillStyle = textGrad;
   ctx.textAlign = 'left';
 
-  const maxWidth = W - 80;
+  const maxWidth = cardW - 80;
   const words = text.split(' ');
   let lines = [];
   let line = '';
@@ -238,37 +311,60 @@ async function generateCard(text) {
   }
   if (line) lines.push(line);
 
-  if (lines.length > 12) {
-    lines = lines.slice(0, 12);
-    lines[11] += '...';
+  if (lines.length > 11) {
+    lines = lines.slice(0, 11);
+    lines[10] += '...';
   }
 
-  const lineHeight = 34;
-  const startY = 130;
+  const lineHeight = 36;
   const totalHeight = lines.length * lineHeight;
-  const textY = Math.max(startY, (H - totalHeight) / 2 - 20);
+  const textY = Math.max(220, (H - totalHeight) / 2 - 10);
 
   lines.forEach((l, i) => {
-    ctx.fillText(l, 40, textY + i * lineHeight);
+    ctx.fillText(l, 66, textY + i * lineHeight);
   });
 
-  // Attribution
-  ctx.font = '12px Inter, sans-serif';
-  ctx.fillStyle = mutedColor;
-  ctx.textAlign = 'center';
-  ctx.fillText('unsaid.app', W / 2, H - 50);
+  // --- Bottom accent glow line ---
+  ctx.save();
+  ctx.shadowColor = isDark ? 'rgba(201,168,76,0.15)' : 'rgba(201,168,76,0.2)';
+  ctx.shadowBlur = 12;
+  ctx.fillStyle = '#c9a84c';
+  ctx.fillRect(80, H - 104, W - 160, 1.5);
+  ctx.restore();
 
-  // Bottom accent
-  ctx.fillStyle = accentColor;
-  ctx.fillRect(40, H - 35, W - 80, 1);
-
-  // Draw watermark
-  ctx.globalAlpha = 0.06;
-  ctx.font = '120px "Playfair Display", Georgia, serif';
-  ctx.fillStyle = textColor;
+  // --- Attribution ---
+  ctx.font = '11px Inter, sans-serif';
+  ctx.fillStyle = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)';
   ctx.textAlign = 'center';
-  ctx.fillText('U', W / 2, H / 2 + 40);
-  ctx.globalAlpha = 1;
+  ctx.fillText('unsaid.app', W / 2, H - 78);
+
+  // --- Subtle watermark ---
+  ctx.save();
+  ctx.globalAlpha = 0.03;
+  ctx.font = '160px "Playfair Display", Georgia, serif';
+  ctx.fillStyle = isDark ? '#c9a84c' : '#c9a84c';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('U', W / 2, H / 2 + 20);
+  ctx.restore();
+}
+
+// roundRect polyfill for canvas
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+    if (typeof r === 'number') r = [r, r, r, r];
+    const [tl, tr, br, bl] = r.length === 4 ? r : [r[0], r[0], r[0], r[0]];
+    this.moveTo(x + tl, y);
+    this.lineTo(x + w - tr, y);
+    this.quadraticCurveTo(x + w, y, x + w, y + tr);
+    this.lineTo(x + w, y + h - br);
+    this.quadraticCurveTo(x + w, y + h, x + w - br, y + h);
+    this.lineTo(x + bl, y + h);
+    this.quadraticCurveTo(x, y + h, x, y + h - bl);
+    this.lineTo(x, y + tl);
+    this.quadraticCurveTo(x, y, x + tl, y);
+    this.closePath();
+  };
 }
 
 // --- Share: Download ---
