@@ -392,7 +392,7 @@ async function generateGif(text) {
   el.cardCanvas.classList.add('hidden');
   el.cardGif.classList.add('hidden');
 
-  const W = 400, H = 467;
+  const W = 600, H = 700;
   const offscreen = document.createElement('canvas');
   offscreen.width = W;
   offscreen.height = H;
@@ -402,8 +402,8 @@ async function generateGif(text) {
   const accent = '#c9a84c';
 
   // Word-wrap text into lines (reused each frame)
-  ctx.font = '17px "Playfair Display", Georgia, serif';
-  const maxW = W - 60;
+  ctx.font = '24px "Playfair Display", Georgia, serif';
+  const maxW = W - 80;
   const words = text.split(' ');
   let lines = [], line = '';
   for (const word of words) {
@@ -413,18 +413,18 @@ async function generateGif(text) {
   }
   if (line) lines.push(line);
   if (lines.length > 11) { lines = lines.slice(0, 11); lines[10] += '...'; }
-  const lineH = 28;
+  const lineH = 38;
   const totalH = lines.length * lineH;
 
   // Particles
-  const particleCount = 18;
+  const particleCount = 28;
   const particles = Array.from({ length: particleCount }, () => ({
     x: Math.random() * W,
     y: Math.random() * H,
-    r: 1 + Math.random() * 1.5,
-    speed: 0.3 + Math.random() * 0.6,
-    drift: (Math.random() - 0.5) * 0.3,
-    alpha: 0.1 + Math.random() * 0.3,
+    r: 1.5 + Math.random() * 2,
+    speed: 0.4 + Math.random() * 0.8,
+    drift: (Math.random() - 0.5) * 0.4,
+    alpha: 0.1 + Math.random() * 0.35,
   }));
 
   const totalFrames = 28;
@@ -432,7 +432,7 @@ async function generateGif(text) {
 
   const gif = new GIF({
     workers: 2,
-    quality: 10,
+    quality: 8,
     width: W,
     height: H,
     workerScript: '/gif.worker.js',
@@ -453,81 +453,81 @@ async function generateGif(text) {
 
     // Grid dots
     ctx.fillStyle = isDark ? 'rgba(201,168,76,0.04)' : 'rgba(0,0,0,0.03)';
-    for (let x = 16; x < W; x += 20) {
-      for (let y = 16; y < H; y += 20) {
-        ctx.beginPath(); ctx.arc(x, y, 0.8, 0, Math.PI * 2); ctx.fill();
+    for (let x = 24; x < W; x += 28) {
+      for (let y = 24; y < H; y += 28) {
+        ctx.beginPath(); ctx.arc(x, y, 1, 0, Math.PI * 2); ctx.fill();
       }
     }
 
     // Glass card
-    const cX = 20, cY = 60, cW = W - 40, cH = H - 110;
+    const cX = 28, cY = 80, cW = W - 56, cH = H - 150;
     ctx.save();
     ctx.shadowColor = isDark ? 'rgba(201,168,76,0.06)' : 'rgba(0,0,0,0.04)';
-    ctx.shadowBlur = 30; ctx.shadowOffsetY = 6;
-    ctx.beginPath(); ctx.roundRect(cX, cY, cW, cH, 18);
+    ctx.shadowBlur = 40; ctx.shadowOffsetY = 8;
+    ctx.beginPath(); ctx.roundRect(cX, cY, cW, cH, 24);
     ctx.fillStyle = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)';
     ctx.fill(); ctx.restore();
-    ctx.beginPath(); ctx.roundRect(cX, cY, cW, cH, 18);
+    ctx.beginPath(); ctx.roundRect(cX, cY, cW, cH, 24);
     ctx.strokeStyle = isDark ? 'rgba(201,168,76,0.08)' : 'rgba(0,0,0,0.06)';
-    ctx.lineWidth = 1; ctx.stroke();
+    ctx.lineWidth = 1.5; ctx.stroke();
 
     // Emblems
     ctx.strokeStyle = isDark ? 'rgba(201,168,76,0.25)' : 'rgba(201,168,76,0.4)';
-    ctx.lineWidth = 1.2;
-    [[36, 78], [W - 36, H - 78]].forEach(([x, y], i) => {
+    ctx.lineWidth = 1.5;
+    [[48, 105], [W - 48, H - 105]].forEach(([x, y], i) => {
       ctx.save();
       ctx.translate(x, y);
-      if (i === 1) { ctx.beginPath(); ctx.moveTo(0, 12); ctx.lineTo(0, 0); ctx.lineTo(-12, 0); ctx.stroke(); }
-      else { ctx.beginPath(); ctx.moveTo(0, 12); ctx.lineTo(0, 0); ctx.lineTo(12, 0); ctx.stroke(); }
+      if (i === 1) { ctx.beginPath(); ctx.moveTo(0, 18); ctx.lineTo(0, 0); ctx.lineTo(-18, 0); ctx.stroke(); }
+      else { ctx.beginPath(); ctx.moveTo(0, 18); ctx.lineTo(0, 0); ctx.lineTo(18, 0); ctx.stroke(); }
       ctx.restore();
     });
 
     // Top glow line
     ctx.save();
-    ctx.shadowColor = `rgba(201,168,76,${0.12 + 0.06 * Math.sin(progress * Math.PI * 2)})`;
-    ctx.shadowBlur = 10;
+    ctx.shadowColor = `rgba(201,168,76,${0.15 + 0.08 * Math.sin(progress * Math.PI * 2)})`;
+    ctx.shadowBlur = 15;
     ctx.fillStyle = accent;
-    ctx.fillRect(60, 76, W - 120, 1.2);
+    ctx.fillRect(80, 100, W - 160, 1.5);
     ctx.restore();
 
     // Brand
-    ctx.font = '10px Inter, sans-serif';
+    ctx.font = '13px Inter, sans-serif';
     ctx.fillStyle = isDark ? 'rgba(201,168,76,0.6)' : 'rgba(201,168,76,0.7)';
     ctx.textAlign = 'left';
-    ctx.fillText('UNSAID', 38, 106);
+    ctx.fillText('UNSAID', 50, 140);
 
     // Text with fade-in
     const textAlpha = Math.min(1, progress * 2.5);
     const textOffset = Math.max(0, (1 - textAlpha) * 20);
-    const textGrad = ctx.createLinearGradient(0, 150, 0, H - 80);
+    const textGrad = ctx.createLinearGradient(0, 200, 0, H - 100);
     if (isDark) { textGrad.addColorStop(0, '#e8e6e3'); textGrad.addColorStop(1, '#a8a6a3'); }
     else { textGrad.addColorStop(0, '#1a1a1a'); textGrad.addColorStop(1, '#5a5a5a'); }
-    ctx.font = '17px "Playfair Display", Georgia, serif';
+    ctx.font = '24px "Playfair Display", Georgia, serif';
     ctx.fillStyle = textGrad;
     ctx.textAlign = 'left';
     ctx.globalAlpha = textAlpha;
-    const tY = Math.max(150, (H - totalH) / 2 + 10) + textOffset;
-    lines.forEach((l, i) => ctx.fillText(l, 48, tY + i * lineH));
+    const tY = Math.max(200, (H - totalH) / 2 + 10) + textOffset;
+    lines.forEach((l, i) => ctx.fillText(l, 66, tY + i * lineH));
     ctx.globalAlpha = 1;
 
     // Bottom glow line
     ctx.save();
-    ctx.shadowColor = `rgba(201,168,76,${0.12 + 0.06 * Math.sin(progress * Math.PI * 2 + 1)})`;
-    ctx.shadowBlur = 10;
+    ctx.shadowColor = `rgba(201,168,76,${0.15 + 0.08 * Math.sin(progress * Math.PI * 2 + 1)})`;
+    ctx.shadowBlur = 15;
     ctx.fillStyle = accent;
-    ctx.fillRect(60, H - 80, W - 120, 1.2);
+    ctx.fillRect(80, H - 110, W - 160, 1.5);
     ctx.restore();
 
     // Attribution
-    ctx.font = '9px Inter, sans-serif';
+    ctx.font = '12px Inter, sans-serif';
     ctx.fillStyle = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)';
     ctx.textAlign = 'center';
-    ctx.fillText('unsaid.app', W / 2, H - 60);
+    ctx.fillText('unsaid.app', W / 2, H - 80);
 
     // Animated particles
     particles.forEach((p) => {
       p.y -= p.speed;
-      p.x += p.drift + Math.sin(f * 0.1 + p.x) * 0.1;
+      p.x += p.drift + Math.sin(f * 0.1 + p.x) * 0.15;
       if (p.y < -10) { p.y = H + 10; p.x = Math.random() * W; }
       const pulse = 0.5 + 0.5 * Math.sin(f * 0.15 + p.x);
       ctx.globalAlpha = p.alpha * pulse * (progress > 0.2 ? 1 : progress / 0.2);
@@ -539,12 +539,12 @@ async function generateGif(text) {
     // Subtle shimmer sweep
     if (progress > 0.15) {
       const shimmerX = ((progress - 0.15) / 0.85) * (W + 100) - 50;
-      const shimmerGrad = ctx.createLinearGradient(shimmerX - 40, 0, shimmerX + 40, 0);
+      const shimmerGrad = ctx.createLinearGradient(shimmerX - 60, 0, shimmerX + 60, 0);
       shimmerGrad.addColorStop(0, 'rgba(201,168,76,0)');
-      shimmerGrad.addColorStop(0.5, `rgba(201,168,76,${0.04 * Math.sin(progress * Math.PI)})`);
+      shimmerGrad.addColorStop(0.5, `rgba(201,168,76,${0.06 * Math.sin(progress * Math.PI)})`);
       shimmerGrad.addColorStop(1, 'rgba(201,168,76,0)');
       ctx.fillStyle = shimmerGrad;
-      ctx.fillRect(0, 50, W, H - 100);
+      ctx.fillRect(0, 80, W, H - 160);
     }
 
     gif.addFrame(ctx, { copy: true, delay });
