@@ -43,11 +43,15 @@ const el = {
   btnShareTwitter: $('#btn-share-twitter'),
   btnShareFacebook: $('#btn-share-facebook'),
   btnShareLinkedin: $('#btn-share-linkedin'),
+  voidSearch: $('#void-search'),
+  voidReset: $('#btn-reset-void'),
 };
 
 let currentText = '';
 let toastTimer = null;
 let sharedFromUrl = null;
+let voidFilter = 'all';
+let voidSearchQuery = '';
 
 function init() {
   checkUrlForShared();
@@ -674,14 +678,34 @@ function loadVoid() {
   el.voidEmpty.classList.add('hidden');
 
   if (releases.length === 0) {
+    el.voidEmpty.innerHTML = '<p>You haven\'t released anything yet.</p><p style="font-size:0.9rem;margin-top:8px;font-style:normal">The void waits.</p>';
     el.voidEmpty.classList.remove('hidden');
     return;
   }
 
-  releases.slice().reverse().forEach((msg, i) => {
+  // Apply filters
+  const now = Date.now();
+  const day = 86400000;
+  const filtered = releases.filter((msg) => {
+    const age = now - msg.timestamp;
+    if (voidFilter === 'today' && age > day) return false;
+    if (voidFilter === 'week' && age > day * 7) return false;
+    if (voidFilter === 'month' && age > day * 30) return false;
+    if (voidSearchQuery && !msg.text.toLowerCase().includes(voidSearchQuery.toLowerCase())) return false;
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    el.voidEmpty.classList.remove('hidden');
+    el.voidEmpty.innerHTML = '<p>No messages match your filters.</p>';
+    return;
+  }
+
+  filtered.slice().reverse().forEach((msg, i) => {
     const div = document.createElement('div');
     div.className = 'void-message';
     div.style.animationDelay = (i * 0.05) + 's';
+    div.dataset.index = releases.indexOf(msg);
 
     const time = new Date(msg.timestamp).toLocaleDateString('en-US', {
       month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
@@ -690,10 +714,55 @@ function loadVoid() {
     div.innerHTML = `
       <div class="void-message-text">${escapeHtml(msg.text)}</div>
       <div class="void-message-time">${time}</div>
+      <button class="void-message-del" title="Delete message">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5 4V2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5V4M3 4v9.5a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
     `;
+    div.querySelector('.void-message-del').addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteMessage(msg.timestamp);
+    });
     el.voidFeed.appendChild(div);
   });
 }
+
+function deleteMessage(timestamp) {
+  const releases = getReleases();
+  const idx = releases.findIndex(r => r.timestamp === timestamp);
+  if (idx === -1) return;
+  releases.splice(idx, 1);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(releases));
+  loadVoid();
+  showToast('Message deleted.');
+}
+
+function resetVoid() {
+  if (getReleases().length === 0) return;
+  if (!confirm('Reset your void? This cannot be undone.')) return;
+  localStorage.setItem(STORAGE_KEY, '[]');
+  loadVoid();
+  showToast('Void reset.');
+}
+
+function setVoidFilter(filter) {
+  voidFilter = filter;
+  document.querySelectorAll('.void-filter').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector(`.void-filter[data-filter="${filter}"]`);
+  if (btn) btn.classList.add('active');
+  loadVoid();
+}
+
+el.voidSearch?.addEventListener('input', (e) => {
+  voidSearchQuery = e.target.value;
+  loadVoid();
+});
+
+el.voidReset?.addEventListener('click', resetVoid);
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.void-filter');
+  if (btn) setVoidFilter(btn.dataset.filter);
+});
 
 function escapeHtml(str) {
   const d = document.createElement('div');

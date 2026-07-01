@@ -78,8 +78,22 @@
       </section>
 
       <section id="view-void" class="hidden">
-        <h2 class="void-title">Your Void</h2>
-        <p class="void-subtitle">Everything you've released.</p>
+        <div class="void-header">
+          <div>
+            <h2 class="void-title">Your Void</h2>
+            <p class="void-subtitle">Everything you've released.</p>
+          </div>
+          <button id="btn-reset-void" class="void-reset-btn" title="Reset void">Reset void</button>
+        </div>
+        <div class="void-toolbar">
+          <div class="void-filters">
+            <button class="void-filter active" data-filter="all">All</button>
+            <button class="void-filter" data-filter="today">Today</button>
+            <button class="void-filter" data-filter="week">This Week</button>
+            <button class="void-filter" data-filter="month">This Month</button>
+          </div>
+          <input id="void-search" class="void-search" type="text" placeholder="Search messages...">
+        </div>
         <div id="void-feed" class="void-feed"></div>
         <div id="void-empty" class="void-empty hidden">
           <p>You haven't released anything yet.</p>
